@@ -10,6 +10,7 @@ from skfuzzy import control as ctrl
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
+import random
 
 st.set_page_config(
     page_title="Music recommender",
@@ -17,8 +18,13 @@ st.set_page_config(
     layout="centered"
 )
 
-st.title("Detailed fuzzy logic")
+st.title("Detailed recommendation process")
 
+if 'minute_processed' not in st.session_state:
+    st.session_state.minute_processed = 1
+
+if 'genarated_bpms' not in st.session_state:
+    st.session_state.genarated_bpms = None
 
 
 # TODO Limpiar el datast en otro archivo
@@ -103,6 +109,26 @@ def calculate_intensity_fuzzy(bpm, bpm_variation, plot_consequent=False, plot_an
         st.pyplot(plt.gcf())
     return intensity_sim.output['Intensity']
 
+
+def calculate_session_moment_intensity(generated_bpms, minute, print_values=False, plot_consequent=False, plot_antecedent=False):
+    bpm_registered = generated_bpms[minute]
+    if minute == 0:
+        bpm_variation = 0
+    else:
+        last_bpm = generated_bpms[minute - 1]
+        bpm_variation = bpm_registered - last_bpm
+
+    if print_values:
+        print(f"Minute analized: {minute}")
+        print(f"BPM registered: {bpm_registered}")
+        print(f"Last BPM: {last_bpm}")
+        print(f"BPM variation: {bpm_variation}")
+    
+    intensity = calculate_intensity_fuzzy(bpm_registered, bpm_variation, plot_consequent, plot_antecedent)
+    if print_values:
+        print(f"Intensity: {intensity}")
+    return intensity
+
 option = st.selectbox("Chose a mode:", ["Manual data", "Client data"])
 
 # Ejecutar una acción según la opción seleccionada
@@ -123,8 +149,25 @@ elif option == "Client data":
 
     client_id = st.number_input('Select a client', min_value=1, max_value=df_clients_shown.shape[0], value=1, step=1)
     client_id = client_id - 1  # Adjust for zero-based index
-    if st.button('Select'):
+    if st.button('Select client'):
+        st.session_state.minute_processed = 1
         min_val, max_val, avg, N = df_gym.iloc[client_id]['Resting_BPM'], df_gym.iloc[client_id]['Max_BPM'], df_gym.iloc[client_id]['Avg_BPM'], math.trunc(df_gym.iloc[client_id]['Session_Duration (hours)'] * 60)
         std = mean_std_ratio_avg_max * (max_val - avg)
 
-        genarated_heart_rates_beta, df_distr = genarate_heart_rates_beta(min_val, max_val, avg, std, N)
+        st.session_state.genarated_bpms, df_distr = genarate_heart_rates_beta(min_val, max_val, avg, std, N)
+
+        intensity = calculate_session_moment_intensity(st.session_state.genarated_bpms, st.session_state.minute_processed, plot_consequent=True, plot_antecedent=True)
+        st.write(f"Minute: {st.session_state.minute_processed}")
+        st.write(f"Current bpm: {int(st.session_state.genarated_bpms[st.session_state.minute_processed])}, Last bpm: {int(st.session_state.genarated_bpms[st.session_state.minute_processed - 1])}")
+        st.write(f"## Intensity: {round(intensity, 2)}")
+
+    if st.button('Next song'):
+        st.session_state.minute_processed += random.randint(1, 5)
+        if st.session_state.minute_processed < len(st.session_state.genarated_bpms):
+            intensity = calculate_session_moment_intensity(st.session_state.genarated_bpms, st.session_state.minute_processed, plot_consequent=True, plot_antecedent=True)
+            st.write(f"Minute: {st.session_state.minute_processed}")
+            st.write(f"Current bpm: {int(st.session_state.genarated_bpms[st.session_state.minute_processed])}, Last bpm: {int(st.session_state.genarated_bpms[st.session_state.minute_processed - 1])}")
+            st.write(f"## Intensity: {round(intensity, 2)}")
+        else:
+            st.write("Session finished")
+        st.write(f"Minute: {st.session_state.minute_processed}")
