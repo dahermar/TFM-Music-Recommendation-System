@@ -118,11 +118,3 @@ def calculate_intensity_fuzzy(bpm, bpm_variation, plot_consequent=False, plot_an
         st.pyplot(plt.gcf())
     return intensity_sim.output['Intensity']
 
-
-st.write('### Example')
-st.markdown("""
-- **BPM**: 120
-- **BPM Variation**: 10
-""")
-
-calculate_intensity_fuzzy(120, 10, plot_consequent=False, plot_antecedent=False)

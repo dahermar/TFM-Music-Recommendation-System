@@ -60,21 +60,6 @@ def genarate_heart_rates_beta(min_val, max_val, avg, std, N):
 
 mean_std_ratio_avg_max = 0.36578887474025085 #Obtained from doing the mean
 
-min_val, max_val, avg, N = df_gym.iloc[0]['Resting_BPM'], df_gym.iloc[0]['Max_BPM'], df_gym.iloc[0]['Avg_BPM'], math.trunc(df_gym.iloc[0]['Session_Duration (hours)'] * 60)
-std = mean_std_ratio_avg_max * (max_val - avg)
-
-genarated_heart_rates_beta, df_distr = genarate_heart_rates_beta(min_val, max_val, avg, std, N)
-
-# st.write('Real data')
-# st.write(f"Min: {min_val}, Max: {max_val}, Avg: {avg}, Std: {std}, N: {N}")
-
-# st.write("Generated data using beta distribution")
-# st.write(f"Generated average: {np.mean(genarated_heart_rates_beta):.2f}")
-# st.write(f"Generated std: {np.std(genarated_heart_rates_beta, ddof=1):.2f}")
-# st.write(f"Generated min: {np.min(genarated_heart_rates_beta):.2f}")
-# st.write(f"Generated max: {np.max(genarated_heart_rates_beta):.2f}")
-
-# st.line_chart(df_distr)
 
 #First model - Fuzzy logic
 bpm_antecedent = ctrl.Antecedent(np.arange(30, 201, 1), 'BPM')
@@ -126,9 +111,20 @@ if option == "Manual data":
     last_bpm = st.number_input('Last measured BPM', min_value=40, max_value=200, value=150, step=1)
     variation = current_bpm - last_bpm
     
-    if st.button('Haz clic aquí'):
+    if st.button('Process'):
         calculate_intensity_fuzzy(current_bpm, variation, plot_consequent=True, plot_antecedent=True)
 
 elif option == "Client data":
-    st.write("Work in progress")
+    st.write("Gym Members Exercise Dataset")
+    df_clients_shown = df_gym[['Age', 'Gender', 'Weight (kg)','Height (m)', 'Session_Duration (hours)', 'Workout_Type']].copy()
+    df_clients_shown.rename(columns={'Session_Duration (hours)': 'Duration (hours)'}, inplace=True) 
+    df_clients_shown.index = df_clients_shown.index + 1
+    st.dataframe(df_clients_shown, height=300)
 
+    client_id = st.number_input('Select a client', min_value=1, max_value=df_clients_shown.shape[0], value=1, step=1)
+    client_id = client_id - 1  # Adjust for zero-based index
+    if st.button('Select'):
+        min_val, max_val, avg, N = df_gym.iloc[client_id]['Resting_BPM'], df_gym.iloc[client_id]['Max_BPM'], df_gym.iloc[client_id]['Avg_BPM'], math.trunc(df_gym.iloc[client_id]['Session_Duration (hours)'] * 60)
+        std = mean_std_ratio_avg_max * (max_val - avg)
+
+        genarated_heart_rates_beta, df_distr = genarate_heart_rates_beta(min_val, max_val, avg, std, N)

@@ -4,6 +4,12 @@ import matplotlib.pyplot as plt
 import skfuzzy as fuzz
 from skfuzzy import control as ctrl
 
+st.set_page_config(
+    page_title="Music recommender",
+    page_icon="🎵", 
+    layout="centered"
+)
+
 st.title("Fuzzy Logic Graphs")
 
 bpm_antecedent = ctrl.Antecedent(np.arange(30, 201, 1), 'BPM')
