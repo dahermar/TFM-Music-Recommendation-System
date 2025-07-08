@@ -9,21 +9,23 @@ class FuzzyController:
     def __init__(self):
         self.bpm_antecedent = ctrl.Antecedent(np.arange(0, 1.01, 0.01), 'Normalized BPM')
         self.bpm_variation_antecedent = ctrl.Antecedent(np.arange(-0.2, 0.21, 0.01), 'Normalized BPM Variation')
-        self.energy_consequent = ctrl.Consequent(np.arange(0, 1.01, 0.01), 'Energy')
+        self.energy_consequent = ctrl.Consequent(np.arange(-0.17, 1.18, 0.01), 'Energy')
+        #self.energy_consequent = ctrl.Consequent(np.arange(0, 1.01, 0.01), 'Energy')
 
         self.bpm_antecedent['Very Light'] = fuzz.trapmf(self.bpm_antecedent.universe, [0.00, 0.00, 0.54, 0.60])
         self.bpm_antecedent['Light'] = fuzz.trapmf(self.bpm_antecedent.universe, [0.54, 0.60, 0.61, 0.67])
-        self.bpm_antecedent['Moderate'] = fuzz.trapmf(self.bpm_antecedent.universe, [0.61, 0.67, 0.74, 0.80])
-        self.bpm_antecedent['Vigorous'] = fuzz.trapmf(self.bpm_antecedent.universe, [0.74, 0.80, 0.93, 0.99])
+        self.bpm_antecedent['Moderate'] = fuzz.trapmf(self.bpm_antecedent.universe, [0.61, 0.67, 0.70, 0.84])
+        self.bpm_antecedent['Vigorous'] = fuzz.trapmf(self.bpm_antecedent.universe, [0.70, 0.84, 0.93, 0.99])
         self.bpm_antecedent['Near Maximal'] = fuzz.trapmf(self.bpm_antecedent.universe, [0.93, 0.99, 1.00, 1.00])
 
         self.bpm_variation_antecedent['Negative'] = fuzz.trapmf(self.bpm_variation_antecedent.universe, [-0.2, -0.2, -0.15, -0.05])
         self.bpm_variation_antecedent['Zero'] = fuzz.trapmf(self.bpm_variation_antecedent.universe, [-0.15, -0.05, 0.05, 0.15])
         self.bpm_variation_antecedent['Positive'] = fuzz.trapmf(self.bpm_variation_antecedent.universe, [0.05, 0.15, 0.2, 0.21])
 
-        self.energy_consequent['Low'] = fuzz.trapmf(self.energy_consequent.universe, [0.0, 0.0, 0.0, 0.5])
-        self.energy_consequent['Medium'] = fuzz.trapmf(self.energy_consequent.universe, [0.25, 0.5, 0.5, 0.75])
-        self.energy_consequent['High'] = fuzz.trapmf(self.energy_consequent.universe, [0.5, 1, 1.0, 1.0])
+        
+        self.energy_consequent['Low'] = fuzz.trapmf(self.energy_consequent.universe, [-0.2, -0.2, 0.0, 0.375])
+        self.energy_consequent['Medium'] = fuzz.trapmf(self.energy_consequent.universe, [0.125, 0.5, 0.5, 0.875])
+        self.energy_consequent['High'] = fuzz.trapmf(self.energy_consequent.universe, [0.625, 1, 1.21, 1.21])
 
         self.energy_consequent.defuzzify_method = 'centroid'
 

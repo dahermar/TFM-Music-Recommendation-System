@@ -96,7 +96,7 @@ class KmeansContentBasedRecommender:
     
 
 class HybridRecommender:
-    def __init__(self, interaction_matrix, track_uniques, df_music_info, df_users, id_to_cluster, recommendations = None, als_recommender = None, content_based_recommender = None, alpha = 1):
+    def __init__(self, interaction_matrix, track_uniques, df_music_info, df_users, id_to_cluster, recommendations = None, als_recommender = None, content_based_recommender = None, alpha = 2):
         if als_recommender is not None:
             self.collaborative_als_recommender = als_recommender
         else:
@@ -124,14 +124,14 @@ class HybridRecommender:
         
         #We will apply a penalization to the collaborative filtering recommendation based on the user cluster preferences obtained by the content-based recommendation
         for track_id, energy, similarity, has_been_recommended in collaborative_recomendations:
-            cluster_presence = 0.01 #Default multiplier. Used if the song's cluster is not in the user's cluster preferences (content-based recommendation)
+            cluster_presence = 0 #Default multiplier. Used if the song's cluster is not in the user's cluster preferences (content-based recommendation)
             song_cluster = self.id_to_cluster[track_id]
             if song_cluster in content_based_cluster_recommendation.index:
                 cluster_presence = content_based_cluster_recommendation[song_cluster]
             
             #print(track_id, song_cluster, multiplier)
 
-            self.recommendations.append((track_id, energy, similarity * cluster_presence * self.alpha, has_been_recommended))
+            self.recommendations.append((track_id, energy, similarity + cluster_presence * self.alpha, has_been_recommended)) # confidence = colab_conficence + cluster_presence * self.alpha
         self.recommendations = sorted(self.recommendations, key=lambda x: x[2], reverse=True)  # Sort new similarity
 
 
